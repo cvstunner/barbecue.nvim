@@ -1,4 +1,4 @@
-local devicons_ok, devicons = pcall(require, "nvim-web-devicons")
+-- local micons_ok, micons = pcall(require, "mini.icons")
 local config = require("barbecue.config")
 local utils = require("barbecue.utils")
 
@@ -48,7 +48,7 @@ M.highlights = {
 }
 
 ---@type { highlight: string, color: string }[]
-local file_icons = {}
+-- local file_icons = {}
 
 ---Find theme by its name.
 ---
@@ -136,13 +136,13 @@ function M.load()
     )
   end
 
-  for _, icon in pairs(file_icons) do
-    vim.api.nvim_set_hl(
-      0,
-      icon.highlight,
-      vim.tbl_extend("force", theme.normal, { foreground = icon.color })
-    )
-  end
+  -- for _, icon in pairs(file_icons) do
+  --   vim.api.nvim_set_hl(
+  --     0,
+  --     icon.highlight,
+  --     vim.tbl_extend("force", theme.normal, { foreground = icon.color })
+  --   )
+  -- end
 end
 
 ---Get a file's icon and additionally store the found icon for later use.
@@ -150,42 +150,23 @@ end
 ---@param filename string File name to be matched against the icons table.
 ---@param filetype string File type to be matched against the icons table.
 ---@return barbecue.Entry.icon|nil
-function M.get_file_icon(filename, filetype)
-  if not devicons_ok then return nil end
-
-  local basename = vim.fn.fnamemodify(filename, ":t")
-  local extension = vim.fn.fnamemodify(filename, ":e")
-
-  local icons = devicons.get_icons()
-  local icon = icons[extension]
-  if icon == nil then
-    local name = devicons.get_icon_name_by_filetype(filetype)
-    icon = icons[name] or devicons.get_default_icon()
-    if icon == nil then return nil end
-  end
-
-  local highlight = string.format("barbecue_fileicon_%s", icon.name)
-  if file_icons[icon.name] == nil then
-    file_icons[icon.name] = {
-      highlight = highlight,
-      color = icon.color,
-    }
-
-    vim.api.nvim_set_hl(
-      0,
-      highlight,
-      vim.tbl_extend(
-        "force",
-        current_theme ~= nil and current_theme.normal or {},
-        { foreground = icon.color }
-      )
-    )
-  end
-
-  return {
-    icon.icon,
-    highlight = highlight,
-  }
-end
-
+-- function M.get_file_icon(filename, filetype)
+--   -- if not micons_ok then return nil end
+--   local micons = require("mini.icons")
+--
+--   -- print("icon: ", micons.get("file", "file.lua").icon)
+--   local basename = vim.fn.fnamemodify(filename, ":t")
+--   local extension = vim.fn.fnamemodify(filename, ":e")
+--
+--   local icon, hl, is_default = micons.get("file", basename)
+--     or micons.get("extension", extension)
+--
+--   local highlight = string.format("barbecue_fileicon_%s", hl)
+--
+--   return {
+--     icon,
+--     highlight = highlight,
+--   }
+-- end
+--
 return M

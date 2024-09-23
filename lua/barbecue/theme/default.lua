@@ -3,7 +3,7 @@
 ---@param name string String for looking up highlight group.
 ---@return table
 local function hl(name)
-  local highlight = vim.api.nvim_get_hl_by_name(name, true)
+  local highlight = vim.api.nvim_get_hl(0, { name = name, link = false })
   setmetatable(highlight, {
     __index = function(self, key)
       if key == "bg" then return self.background end
@@ -22,12 +22,13 @@ local M = {
   normal = { bg = hl("Normal").bg, fg = hl("Normal").fg },
 
   ellipsis = { fg = hl("Conceal").fg },
-  separator = { fg = hl("Conceal").fg },
+  -- separator = { fg = hl("Conceal").fg },
+  separator = { fg = "#958b79" },
   modified = { fg = hl("String").fg },
 
   dirname = { fg = hl("Conceal").fg },
-  basename = { bold = true },
-  context = {},
+  basename = { fg = "#a99c8b" },
+  context = { fg = "#b6927b" },
 
   context_file = { fg = hl("Structure").fg },
   context_module = { fg = hl("Structure").fg },
@@ -36,11 +37,11 @@ local M = {
   context_class = { fg = hl("Structure").fg },
   context_method = { fg = hl("Function").fg },
   context_property = { fg = hl("Identifier").fg },
-  context_field = { fg = hl("Identifier").fg },
+  context_field = { fg = hl("Identifier").fg, bold = true },
   context_constructor = { fg = hl("Structure").fg },
   context_enum = { fg = hl("Type").fg },
   context_interface = { fg = hl("Type").fg },
-  context_function = { fg = hl("Function").fg },
+  context_function = { fg = hl("Function").fg, bold = true },
   context_variable = { fg = hl("Identifier").fg },
   context_constant = { fg = hl("Constant").fg },
   context_string = { fg = hl("String").fg },

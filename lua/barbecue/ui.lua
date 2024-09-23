@@ -58,6 +58,24 @@ local function truncate_entries(entries, length, max_length, basename_position)
   end
 end
 
+local function trim_last_entry(entries, max_length)
+  if entries == nil or entries[2] == nil then return end
+
+  if max_length <= #entries[1].text[1] + 10 then
+    table.remove(entries, 2)
+    return
+  end
+
+  local curr_entries_len = #entries[1].text[1] + #entries[2].text[1]
+  if curr_entries_len <= max_length - 7 then return end
+
+  entries[2].text[1] = string.sub(
+    entries[2].text[1],
+    1,
+    max_length - #entries[1].text[1] - 10
+  ) .. config.user.symbols.ellipsis
+end
+
 ---Extract custom section and its length from given function.
 ---
 ---@param winnr number Window to be used as context.
@@ -122,12 +140,28 @@ local function create_entries(winnr, bufnr, extra_length)
         + 2
     end
   end
-  truncate_entries(
-    entries,
-    length,
-    vim.api.nvim_win_get_width(winnr),
-    #dirname + 1
-  )
+
+  -- for key, value in pairs(entries) do
+  --   for ky, val in pairs(value) do
+  --     for k, v in pairs(val) do
+  --       print("key: ", k, "value: ", v)
+  --     end
+  --   end
+  --   break
+  -- end
+
+  -- print(#(entries[2].text[1] or ""))
+
+  if #entries > 2 then
+    truncate_entries(
+      entries,
+      length,
+      vim.api.nvim_win_get_width(winnr),
+      #dirname + 1
+    )
+  elseif #entries >= 1 then
+    trim_last_entry(entries, vim.api.nvim_win_get_width(winnr))
+  end
 
   return entries
 end

@@ -74,22 +74,22 @@ function M.basename(winnr, bufnr)
 
   if basename == "" then return nil end
 
-  local icon
-  if config.user.modified(bufnr) and config.user.show_modified then
-    icon = {
-      config.user.symbols.modified,
-      highlight = theme.highlights.modified,
-    }
-  else
-    icon = theme.get_file_icon(filename, vim.bo[bufnr].filetype)
-  end
+  -- local icon
+  -- if config.user.modified(bufnr) and config.user.show_modified then
+  --   icon = {
+  --     config.user.symbols.modified,
+  --     highlight = theme.highlights.modified,
+  --   }
+  -- else
+  --   icon = theme.get_file_icon(filename, vim.bo[bufnr].filetype)
+  -- end
 
   return Entry.new(
     {
       basename,
       highlight = theme.highlights.basename,
     },
-    icon,
+    -- icon,
     {
       win = winnr,
       pos = { 1, 0 },
@@ -159,18 +159,18 @@ local kind_to_highlight = {
 ---
 ---@param kind number Index for looking up the kind icon.
 ---@return barbecue.Entry.icon|nil
-local function get_kind_icon(kind)
-  local type = kind_to_type[kind]
-  local highlight = kind_to_highlight[kind]
-  if type == nil or highlight == nil or config.user.kinds == false then
-    return nil
-  end
-
-  return {
-    config.user.kinds[kind_to_type[kind]],
-    highlight = theme.highlights[kind_to_highlight[kind]],
-  }
-end
+-- local function get_kind_icon(kind)
+--   local type = kind_to_type[kind]
+--   local highlight = kind_to_highlight[kind]
+--   if type == nil or highlight == nil or config.user.kinds == false then
+--     return nil
+--   end
+--
+--   return {
+--     config.user.kinds[kind_to_type[kind]],
+--     highlight = theme.highlights[kind_to_highlight[kind]],
+--   }
+-- end
 
 ---Component that displays LSP context using nvim-navic.
 ---
@@ -184,24 +184,61 @@ function M.context(winnr, bufnr)
   local nestings = navic.get_data(bufnr)
   if nestings == nil then return {} end
 
-  return vim.tbl_map(
-    function(nesting)
-      return Entry.new(
-        {
-          nesting.name,
-          highlight = config.user.context_follow_icon_color
-              and theme.highlights[kind_to_highlight[nesting.kind]]
-            or theme.highlights.context,
-        },
-        get_kind_icon(nesting.kind),
-        {
-          win = winnr,
-          pos = { nesting.scope.start.line, nesting.scope.start.character },
-        }
-      )
-    end,
-    nestings
-  )
+  -- print("bufnr: ", vim.bo[bufnr].filetype)
+
+  local filtered_nestings = {}
+  local filetype = vim.bo[bufnr].filetype
+
+  if filetype == "html" then
+    if #nestings > 0 then
+      local last_element = nestings[#nestings]
+      table.insert(filtered_nestings, last_element)
+    end
+  else
+    local index = 0
+    filtered_nestings = vim.tbl_filter(function(nesting)
+      local kind = nesting.kind
+      index = index + 1
+
+      if filetype == "lua" and kind == 4 then return false end
+
+      if kind == 6 or kind == 12 or (kind == 13 and M.isFunction(nesting)) then
+        if filetype ~= "java" then
+          nestings[index].name = nesting.name .. "()"
+        end
+        return true
+      elseif
+        (kind >= 1 and kind <= 5)
+        or (kind >= 8 and kind <= 11)
+        or (kind == 23 and kind == 24 and kind == 26)
+      then
+        return true
+      else
+        return false
+      end
+    end, nestings)
+  end
+
+  return vim.tbl_map(function(nesting)
+    local kind_name = kind_to_type[nesting.kind] or "unknown"
+    return Entry.new({
+      nesting.name,
+      highlight = config.user.context_follow_icon_color
+          and theme.highlights[kind_to_highlight[kind_name]]
+        or theme.highlights.context,
+    }, {
+      win = winnr,
+      pos = { nesting.scope.start.line, nesting.scope.start.character },
+    })
+  end, filtered_nestings)
+end
+
+function M.isFunction(nesting)
+  if (nesting.scope["end"].line - nesting.scope.start.line) >= 5 then
+    return true
+  end
+
+  return false
 end
 
 return M

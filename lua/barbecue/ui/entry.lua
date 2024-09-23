@@ -22,7 +22,7 @@ function Entry.new(text, icon, to)
   local instance = setmetatable({}, Entry)
 
   instance.text = text
-  instance.icon = icon
+  -- instance.icon = icon
   instance.to = to
 
   return instance
@@ -47,13 +47,13 @@ function Entry:len()
   local length = vim.api.nvim_eval_statusline(utils.str_escape(self.text[1]), {
     use_winbar = true,
   }).width
-  if self.icon ~= nil then
-    length = length
-      + vim.api.nvim_eval_statusline(utils.str_escape(self.icon[1]), {
-        use_winbar = true,
-      }).width
-      + 1
-  end
+  -- if self.icon ~= nil then
+  --   length = length
+  --     + vim.api.nvim_eval_statusline(utils.str_escape(self.icon[1]), {
+  --       use_winbar = true,
+  --     }).width
+  --     + 1
+  -- end
 
   return length
 end
@@ -72,12 +72,12 @@ function Entry:to_string()
         self.to.pos[2]
       )
     )
-    .. (self.icon == nil and "" or string.format(
-      "%%#%s#%s%%#%s# ",
-      self.icon.highlight,
-      utils.str_escape(self.icon[1]),
-      theme.highlights.normal
-    ))
+    -- .. (self.icon == nil and "" or string.format(
+    --   "%%#%s#%s%%#%s# ",
+    --   self.icon.highlight,
+    --   utils.str_escape(self.icon[1]),
+    --   theme.highlights.normal
+    -- ))
     .. string.format(
       "%%#%s#%s",
       self.text.highlight,
