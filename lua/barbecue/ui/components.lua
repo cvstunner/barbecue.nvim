@@ -1,3 +1,4 @@
+local micons_ok, micons = pcall(require, "mini.icons")
 local navic = require("nvim-navic")
 local config = require("barbecue.config")
 local theme = require("barbecue.theme")
@@ -83,6 +84,17 @@ function M.basename(winnr, bufnr)
   -- else
   --   icon = theme.get_file_icon(filename, vim.bo[bufnr].filetype)
   -- end
+
+  if micons_ok then
+    local extension = vim.fn.fnamemodify(basename, ":e")
+
+    -- if micons_ok then print("OK") end
+
+    local icon, hl, is_default = micons.get("file", basename)
+      or micons.get("extension", extension)
+
+    basename = icon .. " " .. basename
+  end
 
   return Entry.new(
     {
@@ -189,7 +201,7 @@ function M.context(winnr, bufnr)
   local filtered_nestings = {}
   local filetype = vim.bo[bufnr].filetype
 
-  if filetype == "html" then
+  if filetype == "html" or filetype == "php" then
     if #nestings > 0 then
       local last_element = nestings[#nestings]
       table.insert(filtered_nestings, last_element)
@@ -202,15 +214,11 @@ function M.context(winnr, bufnr)
 
       if filetype == "lua" and kind == 4 then return false end
 
-      if kind == 6 or kind == 12 or (kind == 13 and M.isFunction(nesting)) then
-        if filetype ~= "java" then
-          nestings[index].name = nesting.name .. "()"
-        end
-        return true
-      elseif
-        (kind >= 1 and kind <= 5)
-        or (kind >= 8 and kind <= 11)
-        or (kind == 23 and kind == 24 and kind == 26)
+      if
+        (kind >= 1 and kind <= 6)
+        or (kind >= 8 and kind <= 12)
+        or ((kind == 13 or kind == 7) and M.isFunction(nesting))
+        or (kind == 23 or kind == 24 or kind == 26)
       then
         return true
       else

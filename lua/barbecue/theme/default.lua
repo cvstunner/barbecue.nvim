@@ -27,8 +27,10 @@ local M = {
   modified = { fg = hl("String").fg },
 
   dirname = { fg = hl("Conceal").fg },
-  basename = { fg = "#a99c8b" },
-  context = { fg = "#b6927b" },
+  -- basename = { fg = "#bcad9c" },
+  -- context = { fg = "#b6927b" },
+  basename = { fg = "#E29EC5" },
+  context = { fg = "#92A2D5" },
 
   context_file = { fg = hl("Structure").fg },
   context_module = { fg = hl("Structure").fg },
